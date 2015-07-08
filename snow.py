@@ -3,6 +3,8 @@ import string
 import re
 import pybloomfilter
 from optparse import OptionParser
+import fileinput
+
 def find(s, ch):
     return [i for i, ltr in enumerate(s) if ltr == ch]
 
@@ -46,14 +48,17 @@ def run():
         if options.common:
             inNames &= not lowerWord in commonWords 
         return inNames
-    
-    if not options.filename:
-        print "-f is a required option"
+
+    ## if filename is given then use that
+    ## otherwise use empty file list
+    ## when fileinput.input is given an empty list stdin is used
+    if options.filename:
+        filelist = [options.filename]
     else:
-        with open(options.filename,"rb") as first:
+        filelist = []
             
-            #process on a line by line basis to avoid big buffers
-            for line in first:
+    #process on a line by line basis to avoid big buffers
+    for line in fileinput.input(filelist,mode='rb'):
                 ##check lines for postcode
                 postcodes = re.findall(postcode, line)
                 postcodes = [i[0] for i in postcodes]
